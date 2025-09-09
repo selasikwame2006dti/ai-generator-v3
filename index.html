@@ -1,1 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ AI Image Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; text-align: center; }
+    header { padding: 20px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h1 { margin: 0; font-size: 1.8rem; }
+    form { margin: 20px; display: flex; justify-content: center; gap: 10px; }
+    input { padding: 10px; width: 300px; border-radius: 8px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; border: none; background: #2563eb; color: #fff; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .card h2 { font-size: 1.2rem; margin-bottom: 10px; }
+    .error { color: red; font-size: 0.9rem; }
+    .loading { margin-top: 10px; font-size: 0.9rem; color: #555; }
+    img { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✨ AI Image Generator</h1>
+  </header>
 
+  <form id="promptForm">
+    <input type="text" id="prompt" placeholder="Enter your prompt (e.g. a goat on a surfboard)" required>
+    <button type="submit">Generate</button>
+  </form>
+
+  <div class="grid">
+    <div class="card" id="fluxCard">
+      <h2>⚡ FLUX.1-schnell (Fast)</h2>
+      <div id="fluxStatus" class="loading">Idle...</div>
+      <img id="fluxImage" style="display:none;" />
+      <div id="fluxError" class="error"></div>
+    </div>
+    <div class="card" id="sdCard">
+      <h2>🎨 Stable Diffusion 2 (Reliable)</h2>
+      <div id="sdStatus" class="loading">Idle...</div>
+      <img id="sdImage" style="display:none;" />
+      <div id="sdError" class="error"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("promptForm");
+    const promptInput = document.getElementById("prompt");
+
+    const fluxStatus = document.getElementById("fluxStatus");
+    const fluxImage = document.getElementById("fluxImage");
+    const fluxError = document.getElementById("fluxError");
+
+    const sdStatus = document.getElementById("sdStatus");
+    const sdImage = document.getElementById("sdImage");
+    const sdError = document.getElementById("sdError");
+
+    const SECRET_TOKEN = "8f4b3c9d-2e5a-4f7b-9c1d-3e6f8a2b7c4e";
+
+    async function generateImage(model, statusEl, imgEl, errorEl) {
+      statusEl.textContent = "⏳ Generating...";
+      imgEl.style.display = "none";
+      errorEl.textContent = "";
+
+      try {
+        const response = await fetch("/api/generate.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: promptInput.value, model, secret_token: SECRET_TOKEN })
+        });
+
+        if (!response.ok) throw new Error("Backend request failed: " + response.status);
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (err) {
+          throw new Error("Backend not running or misconfigured.");
+        }
+
+        if (data.error) throw new Error(data.error);
+
+        imgEl.src = data.image;
+        imgEl.style.display = "block";
+        statusEl.textContent = "✅ Done!";
+      } catch (err) {
+        statusEl.textContent = "❌ Failed";
+        errorEl.textContent = err.message;
+      }
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
+      generateImage("black-forest-labs/FLUX.1-schnell", fluxStatus, fluxImage, fluxError);
+      generateImage("stabilityai/stable-diffusion-2", sdStatus, sdImage, sdError);
+    });
+  </script>
+</body>
+</html>
