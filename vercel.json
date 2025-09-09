@@ -1,1 +1,23 @@
-
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/generate.php",
+      "use": "@vercel/php"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/generate.php",
+      "dest": "/api/generate.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
