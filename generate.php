@@ -3,7 +3,7 @@
 
 // Set headers for JSON response and CORS
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Update to 'https://your-app-name.vercel.app' after deployment
+header('Access-Control-Allow-Origin: 'https://ai-generator-v3.vercel.app'); // Update to 'https://your-app-name.vercel.app' after deployment
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -85,4 +85,5 @@ try {
     http_response_code(500);
     echo json_encode(['error' => 'Backend server crashed', 'details' => $e->getMessage()]);
 }
+
 
